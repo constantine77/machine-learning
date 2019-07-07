@@ -140,6 +140,96 @@ please see the example ![diagram12](./pictures/using-model.png)
 please see the example ![diagram13](./pictures/ml-comparison.png)
 
 
+### Machine Learning Workflow:
+
+MLW - an orchestrated and repeatable pattern which systematically transforms and processes information to create prediction solutions.
+
+
+1. Asking the right question(goals we want to achieve, data we need and process we want to perform)
+
+2. Preparing data (gather the data we need to answer our questions)
+
+3. Selecting the algorithm (consider which algorithm we use)
+
+4. Training the model
+
+5. Testing the model (test accuracy, generate statistics)
+
+
+**1. Asking the right question:**
+
+
+
+Example: "Predict if a person will develop diabetes"
+
+Need statement to direct and validate work:
+
+ - Define scope(including data source):
+  
+Predict if a person will be develop diabetes;
+
+Identify critical features;
+
+Focus on at risk population
+
+Select data source
+
+Pima Indian Diabetes study is a good source
+
+Summary: Using Pima Indian Diabetes data, predict which people will develop diabetes
+
+
+ - Define target performance(what prediction accuracy we should expect)
+ 
+
+We will define diabetes in Binary fashion: diabetes or not diabetes
+
+Binary result (True or False)
+
+Genetic difference are a factor
+
+70% Accuracy is common target
+
+Summary:  Using Pima Indian Diabetes data, predict with 70% or great accuracy. which people will develop diabetes
+
+
+ - Define context of usage
+ 
+ 
+ What does it mean disease prediction
+ 
+ Medical research practices
+ 
+ Unknown variations between people
+ 
+ Likelihood is used
+ 
+ Summary:  Using Pima Indian Diabetes data, predict with 70%, which people are likely to develop diabetes
+
+ 
+ - Define how solution will be created
+ 
+ Machine Learning Workflow:
+ 
+ Process Pima Indian data
+ 
+ Transform data as required
+ 
+ Summary:  Use the Machine Learning Workflow to process and transform Pima Indian data to create a prediction model. 
+ This Model must predict with people are likely to develop diabetes with  70% or greater accuracy.
+ 
+ 
+ 
+**2. Preparing Data**
+
+80% of work are getting, cleaning and organize the data
+
+Data Rule #1: closer the data is to what you are predicting, the better
+
+Data Rule #2: Data will never be in the format you need
+
+
+
 
 
 ## Installation:
@@ -179,7 +269,9 @@ command to lunch:
 jupyter notebook
 ```
 
+Tips:
 
+shift + tab - you can see command description
 
 
 
