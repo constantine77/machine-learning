@@ -156,7 +156,7 @@ MLW - an orchestrated and repeatable pattern which systematically transforms and
 5. Testing the model (test accuracy, generate statistics)
 
 
-**1. Asking the right question:**
+#### Asking the right question:
 
 
 
@@ -220,13 +220,61 @@ Summary:  Using Pima Indian Diabetes data, predict with 70% or great accuracy. w
  
  
  
-**2. Preparing Data**
+#### 2. Preparing Data
 
 80% of work are getting, cleaning and organize the data
 
 Data Rule #1: closer the data is to what you are predicting, the better
 
 Data Rule #2: Data will never be in the format you need
+
+Please see the following link with Notebook example: https://github.com/constantine77/machine-learning/blob/master/notebooks/pima-prediction-diabetes.ipynb
+
+#### 3. Selecting the Algorithm
+
+How to decide which algorithm to use?
+
+Algorithm Selection:
+
+1. Learning Type (what learning type they support)
+
+2. Result (result type the algorithm predicts)
+
+3. Complexity (the complexity of the algorithm)
+
+4. Basic vs enhanced
+
+
+1. Learning Type - we are looking into solution statement and guidance it offered.
+We see the prediction keyword - prediction means supervised machine learning.
+
+2. Result Type - prediction can be divided into two subcategories: Regression and Classification.
+
+Regression means: continuous set of values
+
+Classification means: discrete values, small, medium, large or true and false. 
+
+3. Complexity: keep it simple and eliminate "ensemble" algorithms.
+ 
+4. Basic vs enhanced: we choose basic algorithm
+
+Candidate Algorithms:
+
+Naive Bayes
+
+Logistic Regression
+
+Decision Tree
+
+
+
+
+
+
+
+
+
+
 
 
 
