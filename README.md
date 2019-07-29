@@ -270,15 +270,89 @@ Decision Tree
 
 
 
+## Neural networks - Anomaly Detection with Autoencoder
+
+
+What is a Neural Network?
+
+A **Neural Network** is a series of algorithms that endeavors to recognize underlying relationships in a set of data through a process that mimics the way the human brain operates. Neural networks can adapt to changing input; so the network generates the best possible result without needing to redesign the output criteria. 
+
+A neural network works similarly to the human brain’s neural network. A “neuron” in a neural network is a mathematical function that collects and classifies information according to a specific architecture. 
+
+Neural networks are computing systems with interconnected nodes that work much like neurons in the human brain. Using algorithms, they can recognize hidden patterns and correlations in raw data, cluster and classify it, and – over time – continuously learn and improve.
+
+How neural networks work?
+
+A simple neural network includes an input layer, an output (or target) layer and, in between, a hidden layer. The layers are connected via nodes, and these connections form a “network” – the neural network – of interconnected nodes.
+
+please see the diagram ![diagram13](./pictures/neural_network.png)
+
+
+What is the difference between Neural Networks and Deep Learning?
+
+There is no difference. Deep Learning describes the training of artificial neural networks with more than one hidden layer.
+Deep learning is a machine learning technique that performs learning in more than two hidden layers.
+You can also put it in this way – deep learning is an advanced version of the neural network.
+
+Types of neural networks:
+
+**Autoencoder** neural networks are used to create abstractions called encoders, created from a given set of inputs. Although similar to more traditional neural networks, autoencoders seek to model the inputs themselves, and therefore the method is considered unsupervised. The premise of autoencoders is to desensitize the irrelevant and sensitize the relevant. As layers are added, further abstractions are formulated at higher layers (layers closest to the point at which a decoder layer is introduced). These abstractions can then be used by linear or nonlinear classifiers.
+
+Autoencoder is an unsupervised Neural Network. It is a data compression algorithm which takes the input and going through a compressed representation and gives the reconstructed output.
+
+
+Why choose Autoencoder:
+
+As I mentioned above, I want to treat this problem as unsupervised task, particularly as outlier (anomaly) detection task. There are different anomaly detection models (algorithms), but I chose Autoencoders for two reasons. First, thier simplicity to use them, and the second reason is due to the complexity of the data in hand. Plus, the last couple of years, they are getting popularity in real world problems such as in fraud detections.
+
+
+Links:
+
+https://blog.goodaudience.com/neural-networks-for-anomaly-outliers-detection-a454e3fdaae8
 
 
 
+## Evaluating production readiness
 
+Data:
 
+- Feature expectations are captured in a schema.
+- All features are beneficial.
+- No feature’s cost is too much.
+- Features adhere to meta-level requirements.
+- The data pipeline has appropriate privacy controls.
+- New features can be added quickly.
+- All input feature code is tested.
 
+Model:
 
+- Model specs are reviewed and submitted.
+- Offline and online metrics correlate.
+- All hyperparameters have been tuned.
+- The impact of model staleness is known.
+- A simple model is not better.
+- Model quality is sufficient on important data slices.
+- The model is tested for considerations of inclusion.
 
+Infrastructure:
 
+- Training is reproducible.
+- Model specs are unit tested.
+- The ML pipeline is integration tested.
+- Model quality is validated before serving.
+- The model is debuggable.
+- Models are canaried before serving.
+- Serving models can be rolled back.
+
+Monitoring:
+
+- Dependency changes result in notification.
+- Data invariants hold for inputs.
+- Training and serving are not skewed.
+- Models are not too stale.
+- Models are numerically stable.
+- Computing performance has not regressed.
+- Prediction quality has not regressed.
 
 ## Installation:
 
