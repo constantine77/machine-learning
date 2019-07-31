@@ -294,6 +294,13 @@ There is no difference. Deep Learning describes the training of artificial neura
 Deep learning is a machine learning technique that performs learning in more than two hidden layers.
 You can also put it in this way – deep learning is an advanced version of the neural network.
 
+![diagram13](./pictures/nn.png)
+
+and
+
+![diagram13](./pictures/autoencoder.png)
+
+
 Types of neural networks:
 
 **Autoencoder** neural networks are used to create abstractions called encoders, created from a given set of inputs. Although similar to more traditional neural networks, autoencoders seek to model the inputs themselves, and therefore the method is considered unsupervised. The premise of autoencoders is to desensitize the irrelevant and sensitize the relevant. As layers are added, further abstractions are formulated at higher layers (layers closest to the point at which a decoder layer is introduced). These abstractions can then be used by linear or nonlinear classifiers.
@@ -407,3 +414,9 @@ https://app.pluralsight.com/player?course=understanding-machine-learning&author=
 
 2: Understanding ML with Python:
 
+
+3. Project Management:
+
+https://www.jeremyjordan.me/ml-projects-guide/
+
+https://towardsdatascience.com/complete-guide-to-machine-learning-project-structuring-for-managers-2412bd57a5d
