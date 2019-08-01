@@ -319,6 +319,59 @@ https://blog.goodaudience.com/neural-networks-for-anomaly-outliers-detection-a45
 
 
 
+
+### Artificial Neuron:
+
+Neural Networks are the building blocks for making Intelligent Systems.
+
+
+![diagram17](./pictures/artificial_neuron.png)
+
+So this what the architecture of Artificial Neuron looks like:
+
+The 3 arrows correspond to the 3 inputs coming into the network.
+The values [0.7,0.6,1.4] are the weights assigned to the corresponding input.
+So what are weights now?
+Let’s take an example to understand this term.
+Consider a university which grants student admission on 2 basis .One is their grades and second is the university test .
+So this university has decided that grades will carry 70% of the overall weightage and university test will carry 30% for the admission process.
+
+Coming back to our network.
+
+Inputs get multiplied with their respective weights and their sum is taken.
+Consider 3 inputs as x1,x2,x3.
+Consider 3 weights be w1,w2,w3
+Sum = x1w1 + x2w2+x3w3.
+i.e. Sum=x1(0.7) + x2(0.6) + x3(1.4)
+
+After summing we add bias to the sum obtained.
+This Bias is just a constant number say 1 which is added for scaling purposes.
+NewSum=x1(0.7) + x2(0.6) + x3(1.4) + bias
+It’s not necessary to add bias but it is a good practice as it speeds up the process.
+
+After adding bias, we reach at threshold step. If the newsum calculated is above the threshold value the neuron gets excited and it passes out the output.
+
+
+### Understanding Activation Functions in Neural Networks:
+So what does an artificial neuron do? Simply put, it calculates a “weighted sum” of its input, adds a bias and then decides whether it should be “fired” or not ( yeah right, an activation function does this, but let’s go with the flow for a moment ).
+
+So consider a neuron.
+
+![diagram17](./pictures/neuron.png)
+
+Now, the value of Y can be anything ranging from -inf to +inf. The neuron really doesn’t know the bounds of the value. So how do we decide whether the neuron should fire or not ( why this firing pattern? Because we learnt it from biology that’s the way brain works and brain is a working testimony of an awesome and intelligent system ).
+
+We decided to add “activation functions” for this purpose. To check the Y value produced by a neuron and decide whether outside connections should consider this neuron as “fired” or not. Or rather let’s say — “activated” or not.
+
+
+
+Now, which activation functions to use. Does that mean we just use ReLu for everything we do? Or sigmoid or tanh? Well, yes and no. For example, a sigmoid works well for a classifier.
+If you don’t know the nature of the function you are trying to learn, then maybe i would suggest start with ReLu, and then work backwards. ReLu works most of the time as a general approximator!
+
+
+
+
+
 ## Evaluating production readiness
 
 Data:
@@ -408,6 +461,19 @@ shift + tab - you can see command description
 
 
 ## Links:
+
+
+1. Autoencoder:
+
+activation function:
+
+https://medium.com/the-theory-of-everything/understanding-activation-functions-in-neural-networks-9491262884e0
+
+https://becominghuman.ai/what-is-an-artificial-neuron-8b2e421ce42e
+
+Simple Autoencoders using Keras:
+
+https://medium.com/datadriveninvestor/simple-autoencoders-using-keras-6e67677f5679
 
 1. Understanding Machine Learning:
 https://app.pluralsight.com/player?course=understanding-machine-learning&author=david-chappell&name=understanding-machine-learning-m4&clip=6&mode=live
