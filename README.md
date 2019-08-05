@@ -318,6 +318,18 @@ Links:
 https://blog.goodaudience.com/neural-networks-for-anomaly-outliers-detection-a454e3fdaae8
 
 
+**Keras** is one of the leading high-level neural networks APIs. It is written in Python and supports multiple back-end neural network computation engines.
+
+Keras was created to be user friendly, modular, easy to extend, and to work with Python. The API was “designed for human beings, not machines,” and “follows best practices for reducing cognitive load.”
+
+Neural layers, cost functions, optimizers, initialization schemes, activation functions, and regularization schemes are all standalone modules that you can combine to create new models. New modules are simple to add, as new classes and functions. Models are defined in Python code, not separate model configuration files.
+
+Keras proper does not do its own low-level operations, such as tensor products and convolutions; it relies on a back-end engine for that. Even though Keras supports multiple back-end engines, its primary (and default) back end is TensorFlow, and its primary supporter is Google. The Keras API comes packaged in TensorFlow as tf.keras, which as mentioned earlier will become the primary TensorFlow API as of TensorFlow 2.0.
+
+**TensorFlow** created by the Google Brain team, TensorFlow is an open source library for numerical computation and large-scale machine learning. TensorFlow bundles together a slew of machine learning and deep learning (aka neural networking) models and algorithms and makes them useful by way of a common metaphor. It uses Python to provide a convenient front-end API for building applications with the framework, while executing those applications in high-performance C++.
+
+Currently, the most famous deep learning library in the world is Google's TensorFlow. Google product uses machine learning in all of its products to improve the search engine, translation, image captioning or recommendations.
+
 
 
 ### Artificial Neuron:
@@ -369,7 +381,60 @@ Now, which activation functions to use. Does that mean we just use ReLu for ever
 If you don’t know the nature of the function you are trying to learn, then maybe i would suggest start with ReLu, and then work backwards. ReLu works most of the time as a general approximator!
 
 
+### Autoencoder Architecture
 
+An autoencoder is a feed-forward multilayer neural network that reproduces the input data on the output layer. By definition then, the number of output units must be the same as the number of input units. The autoencoder is usually trained using the backpropagation algorithm against a loss function, like the mean squared error (MSE).
+
+
+For this case study, we built an autoencoder with three hidden layers, with the number of units 30-14-7-7-30 and tanh and reLu as activation functions, as first introduced in the blog post “Credit Card Fraud Detection using Autoencoders in Keras — TensorFlow for Hackers (Part VII),” by Venelin Valkov
+
+
+The autoencoder was then trained with Adam — an optimized version of backpropagation — on just legitimate transactions, for 50 epochs, against the MSE as a loss function.
+
+### Data Preparation
+
+There is not much to do for data preparation in this use case, just a few steps
+
+
+![diagram17](./pictures/data_preparation.png)
+
+
+Split the original data set into a number of subsets (Figure 2). Define:
+a training set, consisting of only “normal” transactions, to train the autoencoder
+a test set, again of only “normal” transactions, to test the autoencoder
+a validation set with mixed “normal” and “fraudulent” transactions to define the value of threshold K
+Neural networks accept only normalized input vectors falling in [0,1]. We will need to normalize all input features to fall in [0,1].
+
+### Training and Testing the Autoencoder
+
+One input layer with as many dimensions (30) as the input features (Keras Input Layer node)
+A hidden layer that compresses the data into 14 dimensions using tanh activation function (Keras Dense Layer node)
+A hidden layer that compresses the data into 7 dimensions using reLU activation function (Keras Dense Layer node)
+One more hidden layer that transforms the input 7 dimensions into 7 other dimensions using tanh activation function (Keras Dense Layer node)
+One output layer that expands the data back to as many dimensions as in the input vector (30) using reLU activation function (Keras Dense Layer node)
+This autoencoder is trained using the Keras Network Learner node, where the number of epochs and the batch size are set to 50, the training algorithm is set to Adam, and the loss function is set to be the mean squared error
+
+
+After training, the network is applied on the data from the test set to reproduce the input features using the DL Network Executor node, and it is saved for deployment as a Keras file using the Keras Network Writer node.
+
+The next step would be to calculate the distance between the original feature vector and the reproduced feature vector and to define the optimal threshold K to discover fraud candidates.
+
+
+
+### Rule for Fraud Candidates
+
+When the model training is finished, the autoencoder knows how to reproduce feature vectors representing legitimate transactions onto the output layer. How can we now spot suspicious transactions? If we have a new transaction xk, how can we tell whether it is a suspicious one or a legitimate one?
+First, we run this new transaction X through the autoencoder. The reproduction of the original transaction is generated at the output layer.
+Now a reconstruction error & is calculated as the distance between the original transaction vector and the reproduced one.
+A transaction is then considered a fraud candidate according to the following rule:
+XK → "normal" if Ek <K
+XK → "anomaly" if Ek > K where Ek is the reconstruction error value for transaction xk and K is a threshold. The Mean Square distance was also adopted for the reconstruction error.
+The value of threshold Kis defined on a validation set. If a validation set with labeled fraudulent transactions is available, the value of threshold Kis optimized against the accuracy of fraud detection. Otherwise, if no labeled fraudulent transactions are available, the value of threshold Kis defined as a high percentile of the reconstruction errors on the validation set.
+
+
+###vOptimizing Threshold K
+
+The value of the loss function at the end of the autoencoder training though does not tell the whole story. It just tells how well the network is able to reproduce “normal” input data onto the output layer. To have a full picture of how well this approach performs in detecting anomalies, we need to apply the anomaly detection rule to the validation set. We will use the prediction accuracy on the validation set to optimize the value of threshold K.
 
 
 ## Evaluating production readiness
