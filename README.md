@@ -5,8 +5,12 @@
 
 ## 2. ML with Python
 
+## 9. Installing Keras with TensorFlow backend and scikit-learn using Python virtual environment:
+
 
 ## 1. ML Theory:
+
+## Installation:
 
 ### What is Machine Learning
 
@@ -270,7 +274,7 @@ Decision Tree
 
 
 
-## Neural networks - Anomaly Detection with Autoencoder
+## Neural networks Part 1 - Anomaly Detection with Autoencoder
 
 
 What is a Neural Network?
@@ -301,7 +305,17 @@ and
 ![diagram13](./pictures/autoencoder.png)
 
 
-Types of neural networks:
+
+Neural Network Types:
+
+Supervised vs Unsupervised Learning:
+
+Neural networks learn via supervised learning; Supervised machine learning involves an input variable x and output variable y. The algorithm learns from a training dataset. With each correct answers, algorithms iteratively make predictions on the data. The learning stops when the algorithm reaches an acceptable level of performance.
+
+Unsupervised machine learning has input data X and no corresponding output variables. The goal is to model the underlying structure of the data for understanding more about the data. The keywords for supervised machine learning are classification and regression. For unsupervised machine learning, the keywords are clustering and association.
+
+
+Algorithms of neural networks:
 
 **Autoencoder** neural networks are used to create abstractions called encoders, created from a given set of inputs. Although similar to more traditional neural networks, autoencoders seek to model the inputs themselves, and therefore the method is considered unsupervised. The premise of autoencoders is to desensitize the irrelevant and sensitize the relevant. As layers are added, further abstractions are formulated at higher layers (layers closest to the point at which a decoder layer is introduced). These abstractions can then be used by linear or nonlinear classifiers.
 
@@ -437,6 +451,10 @@ The value of threshold Kis defined on a validation set. If a validation set with
 The value of the loss function at the end of the autoencoder training though does not tell the whole story. It just tells how well the network is able to reproduce “normal” input data onto the output layer. To have a full picture of how well this approach performs in detecting anomalies, we need to apply the anomaly detection rule to the validation set. We will use the prediction accuracy on the validation set to optimize the value of threshold K.
 
 
+
+## Neural networks Part 2 - Anomaly Prediction with LSTM
+
+
 ## Evaluating production readiness
 
 Data:
@@ -479,36 +497,75 @@ Monitoring:
 - Computing performance has not regressed.
 - Prediction quality has not regressed.
 
-## Installation:
+## Installing Keras with TensorFlow backend and scikit-learn using Python virtual environment:
 
-**Python:**
 
-numpy - scientific computing
+1. Update pip:
 
-```buildoutcfg
-pip install numpy
+```
+pip3 install --upgrade pip
+```
+
+2. Create keras_tf virtual environment:
+
+```
+python3 -m venv keras_tf
+```
+
+3. Activate keras_tf virtual environment:
+
+```
+source keras_tf/bin/activate
+```
+
+4. Installing a few Python dependecies:
+
+
+install Jupyter:
+
+```
+python3 -m pip install jupyter
+```
+
+install Tensorflow:
+
+```
+pip3 install --upgrade tensorflow
 ```
 
 
-pandas - data frames
+install Keras:
 
-```buildoutcfg
+```
+pip3 install keras
+```
+
+numpy - scientific computing:
+
+```
+pip3 install numpy
+```
+
+pandas - data frame:
+
+```
 pip3 install pandas
 ```
 
-matplotlib - 2d plotting
+matplotlib - 2d ploting:
 
-```buildoutcfg
+```
 pip3 install matplotlib
 ```
 
-scikit-learn - ML algorithms, pre-processing, performance evaluation, etc...
+scikit-learn - ML algorithms, pre-processing, preformance evaluation, etc:
 
-```buildoutcfg
-python3 -m pip install scikit-learn
+```
+pip3 install scikit-learn
 ```
 
-**Jupyter Notebook**
+
+5. **Jupyter Notebook**
 
 command to lunch:
 
