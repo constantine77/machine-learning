@@ -1,1 +1,790 @@
 
+
+# 1) Prefer official & structured sources (low friction, high reliability)
+
+* **First-party/official APIs**
+
+  * Google Places / Business Profile API (place details, hours, phone, website, reviews)
+  * Yelp Fusion API
+  * Bing Places / Microsoft Maps API
+  * Foursquare Places API
+  * Facebook/Instagram Graph APIs (pages, locations)
+    *(Check quotas & ToS for each.)*
+* **Open data / registries**
+
+  * **OpenCorporates**, **Companies House (UK)**, **SEC EDGAR (US)**, **GLEIF LEI**, **EU Open Data**, **US SBA/agency datasets**
+  * **Wikidata** for cross-IDs and “good-enough” metadata
+* **Machine-readable on-site signals**
+
+  * **schema.org JSON-LD** (e.g., `LocalBusiness`, `PostalAddress`, `OpeningHoursSpecification`)
+  * **Sitemaps** (discover pages at scale), **RSS/Atom** feeds
+  * **OpenGraph/Twitter Cards** (name, site, logo)
+
+# 2) Search/SERP access (to find & disambiguate entities)
+
+* **Official**: Google **Custom Search JSON API** or Programmable Search Engine
+* **SERP providers** (ready-parsed results): **SerpApi**, **DataForSEO**, **Zenserp**, **Oxylabs SERP**, **Bright Data SERP**
+* **Site-search endpoints** where available (e.g., `?s=` on many CMSs)
+
+# 3) Turnkey scraping/extraction platforms (fastest to production)
+
+* **Apify** (ready-made actors for Google Maps, Yelp, Facebook pages, etc.; scheduling, storage)
+* **Zyte (Scrapy Cloud)** + Smart Proxy Manager & automatic extraction add-ons
+* **Diffbot** (AI-based structured extraction for orgs/locations/articles)
+* **WebScraper.io Cloud**, **ScrapeHero**, **Octoparse**, **Import.io**
+* **Browserless**, **ScrapingBee**, **ScraperAPI**, **Oxylabs**, **Bright Data** (handle headless browsers, proxies, CAPTCHAs)
+
+# 4) Build-your-own scraping stack (maximum control)
+
+**HTTP + parsing (no JS render):**
+
+* Clients: `requests`, `httpx`, `aiohttp` (Python)
+* Parsers: `lxml`, `BeautifulSoup`, **selectolax** (very fast), `readability-lxml`
+* Crawl frameworks: **Scrapy** (robust, pipelines, throttling), **Fractal** (Go), **Colly** (Go)
+
+**Headless browser (for JS-heavy sites):**
+
+* **Playwright** (recommended), **Puppeteer**, **Selenium**
+* Stealth/fingerprinting helpers: `playwright-stealth`, `undetected-chromedriver`
+* Scrapy integrations: `scrapy-playwright`
+* HTML snapshotters: **Splash** (for Scrapy), or prerender services
+
+**Anti-bot & reliability plumbing:**
+
+* **Proxy rotation**: Zyte SPM, Oxylabs, Bright Data, ScraperAPI (auto-rotate/residential/datacenter)
+* **CAPTCHA solving** (only if ToS allows!): 2Captcha/CapMonster/Anti-Captcha
+* **Request etiquette**: robots.txt checks, rate limiting, retries with backoff, user-agent rotation
+
+# 5) Enrichment & validation APIs (to cross-check accuracy)
+
+* **Domain/company enrichment**: **Clearbit**, **FullContact**, **People Data Labs** (business metadata)
+* **WHOIS** / **DNS** lookups to confirm websites
+* **Phone/email validation**: Twilio Lookup, Veriphone, mailbox providers (MX checks)
+* **Geocoding & address**: **libpostal** (standardization), Google/Mapbox/OpenCage geocoding, USPS (US)
+* **Hours/status**: Compare official site schema.org vs. Google Places vs. Yelp vs. Facebook
+
+# 6) Patterns to maximize accuracy in a validation engine
+
+* **Source hierarchy**: Prefer official APIs → site JSON-LD → multiple third-party listings → HTML heuristics.
+* **Field-level consensus**: Majority vote / weighted scores (e.g., give official APIs more weight).
+* **Freshness & recency**: Track `retrieved_at`, `last_seen`, page ETag/Last-Modified; penalize stale data.
+* **Entity resolution (dedupe/match)**:
+
+  * Normalizers: `libpostal` (addresses), `phonenumbers` (E.164), ICU/Unicode normalization
+  * Fuzzy match: `rapidfuzz` / `textdistance`
+  * Record linkage: `splink`, probabilistic/feature-engineered matching
+* **Change detection**: Version each snapshot; diff structured fields; trigger re-checks on deltas.
+* **Confidence scoring**: Per field + overall entity; log “why” (provenance & weights) for audits.
+* **Human-in-the-loop**: Surface low-confidence cases to reviewers; one-click corrections feed back into training/weights.
+
+# 7) Orchestration, storage, and ops
+
+* **Orchestration**: Airflow, Dagster, Prefect (schedules, retries, SLAs)
+* **Serverless burst**: AWS Lambda/Fargate, GCP Cloud Run, Azure Functions
+* **Queues**: SQS, Pub/Sub, RabbitMQ; **rate-limit by domain**
+* **Storage**:
+
+  * Raw pages: object storage (S3/GCS) with checksum + WARC or HTML
+  * Parsed: Postgres (core facts), Elasticsearch/OpenSearch (search), Parquet in a lake (history)
+* **Monitoring**: Crawl success rate, ban rate, response codes, parse coverage, field drift
+* **Secrets & keys**: Vault/SSM; rotate regularly
+
+# 8) Compliance & risk (don’t skip)
+
+* **Read and honor site ToS**; some prohibit scraping or automated access.
+* **Respect robots.txt** (not legally binding everywhere, but good hygiene and sometimes required by ToS).
+* **Avoid circumventing effective access controls** (legal risk: CFAA and analogs).
+* **Privacy**: If any personal data appears, ensure a lawful basis (GDPR/CCPA) and data minimization.
+* **Attribution/licensing**: Some APIs require displaying source/attribution.
+* **CAPTCHA & anti-bot**: Using solvers can violate ToS—use only where permitted.
+
+# 9) Quick, pragmatic combos (battle-tested)
+
+* **Local business validation**
+
+  1. Query with **Google Places API** and **Yelp Fusion** →
+  2. Crawl official site homepage + parse **JSON-LD LocalBusiness** →
+  3. Cross-check phone/address/hours →
+  4. Score & flag conflicts; geocode to verify location.
+* **Company registry cross-check**
+  OpenCorporates/Companies House + website JSON-LD + WHOIS → reconcile legal vs. trading name and address.
+
+# 10) Lightweight starter tech stack (Python)
+
+* **Discovery**: Google CSE API or SerpApi
+* **Scraping**: Scrapy (+ `scrapy-playwright` for JS pages)
+* **Parsing**: `selectolax`/`lxml`, `extruct` (extracts JSON-LD/microdata/RDFa)
+* **Normalization**: `libpostal`, `phonenumbers`, `python-dateutil`
+* **Matching**: `rapidfuzz`, `splink`
+* **Pipelines**: Airflow/Prefect; storage in Postgres + S3
+
+Got it—since you only need **name, address, phone, contact details (email/site), and description**, here’s a focused, battle-tested approach you can plug into a validation engine, plus concrete code you can start with.
+
+# High-accuracy collection order (per site)
+
+1. **Parse machine-readable data first**
+
+   * Extract **JSON-LD** (`LocalBusiness`, `Organization`), **Microdata**, **RDFa**.
+2. **Fallback to HTML heuristics**
+
+   * Look for common selectors (header/footer, `address`, `tel:` links, `mailto:` links, “Contact” page).
+3. **Discover & crawl contact page(s)**
+
+   * Follow nav links matching `contact|about|locations|find us|impressum`.
+4. **Cross-check with one external source**
+
+   * e.g., Google Places / Yelp / OpenCorporates for tie-breakers & freshness (optional but recommended).
+5. **Normalize & score**
+
+   * Standardize address/phone; compute per-field confidence and provenance.
+
+---
+
+# Output schema (recommended)
+
+```json
+{
+  "source_url": "https://example.com",
+  "name": {"value": "Acme Coffee", "source": "jsonld", "confidence": 0.95},
+  "address": {
+    "raw": "123 Main St, Springfield, IL 62701",
+    "components": {"street": "...", "city": "...", "region": "...", "postal_code": "...", "country": "US"},
+    "source": "jsonld", "confidence": 0.9
+  },
+  "phone": { "raw": "(217) 555-1234", "e164": "+12175551234", "source": "html", "confidence": 0.8 },
+  "emails": [{"value": "info@example.com", "source": "contact_page", "confidence": 0.8}],
+  "website": "https://example.com",
+  "description": {"value": "Small-batch roastery and café...", "source": "jsonld", "confidence": 0.7},
+  "provenance": [{"field": "address", "url": "https://example.com/contact"}, {"field": "phone", "url": "https://example.com/"}],
+  "retrieved_at": "2025-08-20T12:34:56Z"
+}
+```
+
+---
+
+# Minimal Python stack
+
+* **HTTP**: `httpx` (or `requests`)
+* **HTML parse**: `selectolax` (fast) or `BeautifulSoup`
+* **Structured data**: `extruct` (JSON-LD/Microdata/RDFa)
+* **Phones**: `phonenumbers` → E.164
+* **Address**: `libpostal` (parse/normalize) or fallback regex
+* **URL utils**: `tldextract`, `urllib.parse`
+* **Fuzzy match** (optional): `rapidfuzz` (for consensus across sources)
+
+---
+
+# Reference extractor (single URL)
+
+```python
+import re, json, httpx
+from urllib.parse import urljoin, urlparse
+from selectolax.parser import HTMLParser
+import extruct
+from w3lib.html import get_base_url
+import phonenumbers
+# If available: pip install postal  (for libpostal)
+try:
+    from postal.parser import parse_address
+except Exception:
+    parse_address = None
+
+CONTACT_HINTS = re.compile(r'\b(contact|about|impressum|find\s+us|locations?)\b', re.I)
+
+def fetch(url, timeout=15):
+    headers = {"User-Agent": "Mozilla/5.0 (compatible; BizValidator/1.0)"}
+    with httpx.Client(follow_redirects=True, headers=headers, timeout=timeout) as c:
+        r = c.get(url)
+        r.raise_for_status()
+        return r
+
+def extract_structured(html, url):
+    base = get_base_url(html, url)
+    data = extruct.extract(html, base_url=base, syntaxes=['json-ld','microdata','rdfa'])
+    # flatten candidates into a simple pick list
+    items = []
+    for block in (data.get('json-ld') or []) + (data.get('microdata') or []) + (data.get('rdfa') or []):
+        if isinstance(block, dict):
+            items.append(block)
+    # find LocalBusiness/Organization-ish
+    def is_biz(x):
+        t = x.get('@type')
+        if isinstance(t, list): t = [s.lower() for s in t]
+        if isinstance(t, str): t = [t.lower()]
+        return t and any(k in t for k in ['localbusiness','organization','store','restaurant','company','dentist','medicalorganization'])
+    biz = next((x for x in items if is_biz(x)), None)
+    out = {}
+    if biz:
+        out['name'] = biz.get('name')
+        out['description'] = biz.get('description')
+        tel = biz.get('telephone') or biz.get('tel')
+        out['phone'] = tel
+        # address can be a dict or string
+        addr = biz.get('address')
+        if isinstance(addr, dict):
+            parts = {k: addr.get(k) for k in ['streetAddress','addressLocality','addressRegion','postalCode','addressCountry']}
+            out['address'] = ", ".join(filter(None, [
+                parts.get('streetAddress'),
+                parts.get('addressLocality'),
+                parts.get('addressRegion'),
+                parts.get('postalCode'),
+                parts.get('addressCountry') if isinstance(parts.get('addressCountry'), str) else parts.get('addressCountry',{}).get('name')
+            ]))
+        elif isinstance(addr, str):
+            out['address'] = addr
+        # emails sometimes appear as "email" or "contactPoint"
+        email = biz.get('email')
+        if not email and isinstance(biz.get('contactPoint'), dict):
+            email = biz['contactPoint'].get('email')
+        out['email'] = email
+    return out
+
+def normalize_phone(raw, default_region='US'):
+    if not raw: return None, None
+    digits = re.sub(r'[^\d+]', '', raw)
+    try:
+        num = phonenumbers.parse(digits, default_region)
+        if phonenumbers.is_valid_number(num):
+            return raw, phonenumbers.format_number(num, phonenumbers.PhoneNumberFormat.E164)
+    except Exception:
+        pass
+    return raw, None
+
+def parse_emails_and_phones(html):
+    # emails from mailto and text
+    emails = set(re.findall(r'mailto:([^\s"\'<>]+)', html, re.I))
+    emails |= set(re.findall(r'[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}', html, re.I))
+    # phones from tel: and text
+    phones = set(re.findall(r'tel:([^\s"\'<>]+)', html, re.I))
+    phones |= set(re.findall(r'(\+?\d[\d\-\.\s\(\)]{6,}\d)', html))
+    return list(emails), list(phones)
+
+def discover_contact_links(html, base_url):
+    tree = HTMLParser(html)
+    links = []
+    for a in tree.css('a'):
+        txt = (a.text() or '').strip()
+        href = a.attributes.get('href') or ''
+        if CONTACT_HINTS.search(txt) or CONTACT_HINTS.search(href):
+            links.append(urljoin(base_url, href))
+    return list(dict.fromkeys(links))  # unique & ordered
+
+def normalize_address(raw):
+    if not raw: 
+        return {"raw": None, "components": None}
+    if parse_address:
+        comps = dict(parse_address(raw))
+        # map libpostal labels to canonical
+        m = {
+          'house_number':'house_number','road':'street','city':'city','state':'region',
+          'postcode':'postal_code','country':'country','suburb':'district'
+        }
+        norm = {m.get(k,k):v for k,v in comps.items()}
+        return {"raw": raw, "components": norm}
+    return {"raw": raw, "components": None}
+
+def extract_core(url, country_hint='US'):
+    r = fetch(url)
+    html = r.text
+    data = {
+        "source_url": str(r.url),
+        "website": str(r.url),
+        "retrieved_at": r.headers.get('date')
+    }
+    # 1) structured
+    s = extract_structured(html, str(r.url))
+    if s.get('name'):
+        data["name"] = {"value": s["name"], "source":"jsonld","confidence":0.95}
+    if s.get('description'):
+        data["description"] = {"value": s["description"], "source":"jsonld","confidence":0.7}
+    if s.get('phone'):
+        raw, e164 = normalize_phone(s["phone"], country_hint)
+        data["phone"] = {"raw": raw, "e164": e164, "source":"jsonld","confidence":0.85}
+    if s.get('email'):
+        data["emails"] = [{"value": s["email"], "source":"jsonld","confidence":0.7}]
+    if s.get('address'):
+        data["address"] = {**normalize_address(s["address"]), "source":"jsonld","confidence":0.9}
+
+    # 2) HTML heuristics
+    emails, phones = parse_emails_and_phones(html)
+    if emails:
+        data.setdefault("emails", [])
+        for e in emails:
+            if not any(x["value"].lower()==e.lower() for x in data["emails"]):
+                data["emails"].append({"value": e, "source":"html","confidence":0.6})
+    if phones and "phone" not in data:
+        raw, e164 = normalize_phone(phones[0], country_hint)
+        data["phone"] = {"raw": raw, "e164": e164, "source":"html","confidence":0.7}
+
+    # 3) contact page crawl
+    for link in discover_contact_links(html, str(r.url))[:3]:
+        try:
+            rr = fetch(link)
+            e2, p2 = parse_emails_and_phones(rr.text)
+            if e2:
+                data.setdefault("emails", [])
+                for e in e2:
+                    if not any(x["value"].lower()==e.lower() for x in data["emails"]):
+                        data["emails"].append({"value": e, "source":"contact_page","confidence":0.8})
+            # pick address blocks from contact page
+            m = re.search(r'(?s)<address[^>]*>(.*?)</address>', rr.text, re.I)
+            if m and "address" not in data:
+                addr_text = HTMLParser(m.group(1)).text(separator=' ').strip()
+                data["address"] = {**normalize_address(addr_text), "source":"contact_page","confidence":0.75}
+            # also look for postal clues
+            if "address" not in data:
+                lines = [l.strip() for l in HTMLParser(rr.text).text().splitlines() if l.strip()]
+                maybe = [l for l in lines if re.search(r'\b\d{3,}\b', l) and re.search(r'\b[A-Z]{2}\b', l) or re.search(r'\b\d{5}(-\d{4})?\b', l)]
+                if maybe:
+                    data["address"] = {**normalize_address(maybe[0]), "source":"contact_page_text","confidence":0.6}
+        except Exception:
+            pass
+
+    # fill empties
+    data.setdefault("emails", [])
+    return data
+
+# Example usage:
+# result = extract_core("https://example.com")
+# print(json.dumps(result, indent=2))
+```
+
+---
+
+# Scrapy spider skeleton (scale out)
+
+```python
+import scrapy
+from urllib.parse import urljoin
+from mylib import extract_structured, parse_emails_and_phones, normalize_phone, normalize_address
+
+class BizSpider(scrapy.Spider):
+    name = "biz_spider"
+    custom_settings = {
+        "ROBOTSTXT_OBEY": True,
+        "DOWNLOAD_DELAY": 1.0,
+        "CONCURRENT_REQUESTS_PER_DOMAIN": 2,
+        "AUTOTHROTTLE_ENABLED": True,
+    }
+
+    def start_requests(self):
+        for url in getattr(self, "start_urls_list", []):
+            yield scrapy.Request(url, callback=self.parse_home, meta={"root": url})
+
+    def parse_home(self, resp):
+        data = {"source_url": resp.url, "website": resp.url}
+        s = extract_structured(resp.text, resp.url)
+        # populate fields as in the function above...
+        emails, phones = parse_emails_and_phones(resp.text)
+        for a in resp.css('a::attr(href)').getall():
+            if a and re.search(r'(contact|about|impressum|locations?)', a, re.I):
+                yield resp.follow(a, callback=self.parse_contact, meta={"data": data})
+        yield data
+
+    def parse_contact(self, resp):
+        data = resp.meta["data"]
+        emails, phones = parse_emails_and_phones(resp.text)
+        # merge into data; yield final
+        yield data
+```
+
+---
+
+# Accuracy tips (for your five fields)
+
+* **Business name**
+
+  * Priority: JSON-LD `name` → `<meta property="og:site_name">` → `<title>` (but trim tagline).
+  * Avoid ALL CAPS and suffix noise (“| Home”, “– Official Site”).
+* **Address**
+
+  * JSON-LD `address` wins. Otherwise parse `<address>`, footer blocks, contact page.
+  * Normalize with `libpostal`; store both raw and components.
+* **Phone**
+
+  * Prefer JSON-LD `telephone` or `tel:` links. Convert to **E.164**; flag invalid numbers.
+  * If multiple numbers, keep all with labels if present (“sales”, “support”).
+* **Contact details (email/site)**
+
+  * `mailto:` links, obfuscated forms (`info [at] example.com`) → de-obfuscate.
+  * If no email, store contact **form URL** as `contact_form_url`.
+* **Description**
+
+  * JSON-LD `description` → `<meta name="description">` → first paragraph of About/Home.
+  * Keep it short (<= 300 chars) and strip boilerplate.
+
+---
+
+# Optional cross-checks (1–2 calls per record)
+
+* **Google Places Details** for phone/address/website/hours (respect quotas & attribution).
+* **Wikidata / OpenCorporates** for legal vs. trading name differences.
+* **Reverse phone lookup** (Twilio Lookup) to validate number type & country.
+
+---
+
+# Lightweight confidence scoring
+
+* Start at 1.0 for **structured** (JSON-LD); 0.8 for **contact page**; 0.6 for **generic HTML**.
+* Penalize if: value conflicts with another source (−0.2), looks malformed (−0.2), or is stale (page older than 18 months, −0.2).
+* Final field = highest-confidence value; keep alternates in `candidates`.
+
+---
+
+# Compliance hygiene (quick)
+
+* Check and honor each site’s **robots.txt** and **ToS**.
+* Throttle per domain; identify as a crawler in UA string.
+* Don’t bypass effective access controls; avoid scraping behind logins.
+* Handle personal data carefully (e.g., contact emails) under GDPR/CCPA.
+
+---
+
+######################
+1. discover & parse **sitemaps** (including sitemap indexes and `.gz`);
+2. **filter** URLs against your criteria (prioritize home page + “term sheet” pages);
+3. crawl just those pages and extract what you need (name, address, phone, email, description), plus detect/download **term sheets** (webpages or PDFs).
+
+I’ll show the flow first, then drop in working Python you can adapt.
+
+---
+
+##########################################
+
+# High-level flow
+
+1. **Discover sitemaps**
+
+   * Check `https://{domain}/robots.txt` for `Sitemap:` lines.
+   * Fallback to common paths: `/sitemap.xml`, `/sitemap_index.xml`, `/sitemap.gz`.
+2. **Parse sitemaps (recursive)**
+
+   * Handle **Sitemap Index** → fetch child sitemaps.
+   * Handle **URL sitemaps** (XML + optional `<lastmod>`).
+   * Handle `.gz` compression.
+3. **Normalize & de-dupe URLs**
+
+   * Lowercase host, drop fragments, collapse tracking params if desired.
+4. **Filter**
+
+   * Always include **home page**.
+   * Include URLs matching **required criteria** (e.g., contact/about/location pages).
+   * Include pages likely to contain a **term sheet** (see patterns below).
+   * Exclude media, assets, huge pagination patterns, and non-HTML you don’t need.
+   * Optionally: respect `<lastmod>` window (e.g., last 18 months).
+5. **Prioritize**
+
+   * Crawl order: home → “term sheet” candidates → contact/about → the rest (if needed).
+6. **Extract**
+
+   * Structured first (JSON-LD / Microdata) then HTML heuristics for:
+
+     * **name, address, phone, emails, description** (as in my previous message).
+   * For **term sheet**:
+
+     * If HTML page: check title/h1 and body for patterns; save text/html.
+     * If PDF: download, run quick text sniff (pdfminer / pypdf) to confirm, then index.
+7. **Store & index**
+
+   * Save raw HTML/PDF to object storage; save parsed facts + provenance (URL, timestamp, hints) to DB.
+
+---
+
+# Patterns for “term sheet”
+
+Companies mean this in two ways—cover both:
+
+**A) Legal/Policy pages (common across all companies)**
+
+* URL/text hints: `terms`, `terms-of-service`, `terms-and-conditions`, `tos`, `conditions`, `legal`, `policy`, `policies`, `master-services-agreement`, `msa`, `subscription-terms`.
+* PDFs often titled “Terms”, “Service Agreement”, “Order Form”, “MSA”.
+
+**B) Investment/Partnership “Term Sheet” (PDF or HTML)**
+
+* URL/text hints: `term-sheet`, `termsheet`, `investor-terms`, `financing-terms`, `seed-terms`, `series-a-terms`, `cap-table`, `SAFE`, `convertible-note`.
+* PDFs with headings containing “Term Sheet”.
+
+Use both **anchor text + href** and page **title/h1** to score candidates.
+
+---
+
+# Practical include/exclude filters
+
+**Include (regex, case-insensitive):**
+
+```
+^/$
+\b(about|contact|impressum|locations?|find(-|\s)?us|legal|terms|terms-of-service|terms-and-conditions|tos|policy|policies|privacy|compliance|invest(or|ment)|term-?sheet|msa|master-services-agreement)\b
+```
+
+**Exclude:**
+
+```
+\.(png|jpe?g|gif|svg|webp|ico|css|js|mp4|mov|avi|zip|tar|gz|7z|rar|woff2?)$
+[?&](utm_|gclid|fbclid)=
+/(search|tag|category|archive|page/\d+|sort=|filter=)
+/(cart|checkout|login|signup|my-account)  (if not needed)
+```
+
+---
+
+# Working Python (requests + lxml, no headless browser)
+
+> Dependencies: `requests`, `lxml`, `tqdm`, `python-dateutil`, `pdfminer.six` (for PDFs), `tldextract`.
+> For HTML extraction of business fields, reuse the extractor from my previous reply.
+
+```python
+import re, io, gzip, time, json, requests
+from urllib.parse import urljoin, urlparse, urlunparse, parse_qsl, urlencode
+from lxml import etree
+from dateutil.parser import isoparse
+from datetime import datetime, timedelta, timezone
+
+UA = "Mozilla/5.0 (compatible; BizValidator/1.0; +https://example.com/bot)"
+SESSION = requests.Session()
+SESSION.headers.update({"User-Agent": UA})
+TIMEOUT = 20
+
+INCLUDE_RE = re.compile(
+    r"^/$|"
+    r"(about|contact|impressum|locations?|find(?:-|\s)?us|legal|terms|terms-of-service|terms-and-conditions|tos|policy|policies|privacy|compliance|invest(?:or|ment)|term-?sheet|msa|master-services-agreement)",
+    re.I
+)
+TERMS_HINT_RE = re.compile(
+    r"(term(?:\s|-)?sheet|terms(?:\s|-)of(?:\s|-)service|terms(?:\s|-)and(?:\s|-)conditions|msa|master(?:\s|-)services(?:\s|-)agreement)",
+    re.I
+)
+EXCLUDE_RE = re.compile(
+    r"\.(png|jpe?g|gif|svg|webp|ico|css|js|mp4|mov|avi|zip|tar|gz|7z|rar|woff2?)$|"
+    r"/(search|tag|category|archive|page/\d+)(/|$)|"
+    r"/(cart|checkout|login|signup|my-account)(/|$)", re.I
+)
+
+def norm_url(u):
+    """Normalize URL: remove fragments, drop tracking params, keep scheme+netloc+path+clean query."""
+    p = urlparse(u)
+    q = [(k,v) for k,v in parse_qsl(p.query, keep_blank_values=False) if not k.lower().startswith(("utm_", "gclid", "fbclid"))]
+    return urlunparse((p.scheme or "https", p.netloc.lower(), p.path or "/", "", urlencode(q, doseq=True), ""))
+
+def get_robots_sitemaps(domain):
+    robots_url = f"https://{domain}/robots.txt"
+    try:
+        r = SESSION.get(robots_url, timeout=TIMEOUT, allow_redirects=True)
+        if r.status_code >= 400:
+            return []
+        sitemaps = re.findall(r'(?im)^\s*Sitemap:\s*(\S+)', r.text)
+        return [norm_url(u) for u in sitemaps]
+    except Exception:
+        return []
+
+def guess_sitemaps(domain):
+    guesses = [
+        f"https://{domain}/sitemap.xml",
+        f"https://{domain}/sitemap_index.xml",
+        f"https://{domain}/sitemap.gz",
+    ]
+    found = []
+    for u in guesses:
+        try:
+            rr = SESSION.head(u, timeout=TIMEOUT, allow_redirects=True)
+            if rr.status_code < 400:
+                found.append(norm_url(rr.url))
+        except Exception:
+            pass
+    return found
+
+def fetch_bytes(url):
+    r = SESSION.get(url, timeout=TIMEOUT, allow_redirects=True)
+    r.raise_for_status()
+    return r.content, r.headers.get("Content-Type",""), r.url
+
+def parse_xml_bytes(b):
+    parser = etree.XMLParser(recover=True, ns_clean=True)
+    return etree.fromstring(b, parser=parser)
+
+def iter_sitemap_urls(sitemap_url, recent_days=None, _seen=None):
+    """
+    Yields (url, lastmod) from a sitemap or sitemap index, recursing as needed.
+    """
+    _seen = _seen or set()
+    if sitemap_url in _seen:
+        return
+    _seen.add(sitemap_url)
+
+    raw, ctype, final_url = fetch_bytes(sitemap_url)
+    if sitemap_url.endswith(".gz") or "gzip" in ctype:
+        try:
+            raw = gzip.decompress(raw)
+        except Exception:
+            pass
+
+    root = parse_xml_bytes(raw)
+    ns = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
+    tag = etree.QName(root.tag).localname.lower()
+
+    if tag == "sitemapindex":
+        # recurse into each <sitemap><loc>
+        for loc in root.xpath(".//sm:sitemap/sm:loc/text()", namespaces=ns):
+            for item in iter_sitemap_urls(loc.strip(), recent_days=recent_days, _seen=_seen):
+                yield item
+        return
+
+    if tag == "urlset":
+        now = datetime.now(timezone.utc)
+        for url_el in root.xpath(".//sm:url", namespaces=ns):
+            loc = (url_el.findtext("{*}loc") or "").strip()
+            if not loc:
+                continue
+            lastmod = url_el.findtext("{*}lastmod")
+            ts = None
+            if lastmod:
+                try:
+                    ts = isoparse(lastmod)
+                except Exception:
+                    ts = None
+            if recent_days and ts:
+                if (now - ts) > timedelta(days=recent_days):
+                    continue
+            yield norm_url(loc), ts
+        return
+
+    # unknown tag; ignore silently
+
+def collect_domain_urls(domain, recent_days=None):
+    sitemaps = list({*get_robots_sitemaps(domain), *guess_sitemaps(domain)})
+    urls = {}
+    for sm in sitemaps:
+        for u, ts in iter_sitemap_urls(sm, recent_days=recent_days):
+            urls[u] = max(urls.get(u), ts) if u in urls and ts else (ts or urls.get(u))
+    # Always include home page
+    home = f"https://{domain}/"
+    urls.setdefault(home, None)
+    return list(urls.items())
+
+def filter_urls(urls, domain):
+    selected = []
+    for u, ts in urls:
+        p = urlparse(u)
+        if p.netloc.lower() != domain.lower():
+            continue
+        path = p.path or "/"
+        if EXCLUDE_RE.search(path):
+            continue
+        if path == "/" or INCLUDE_RE.search(path) or TERMS_HINT_RE.search(u):
+            selected.append((u, ts))
+    # de-dup
+    seen = set()
+    out = []
+    for u, ts in selected:
+        if u not in seen:
+            seen.add(u)
+            out.append((u, ts))
+    # prioritize
+    out.sort(key=lambda x: (0 if urlparse(x[0]).path == "/" else
+                            -1 if TERMS_HINT_RE.search(x[0]) else 1,
+                            x[1] or datetime.min.replace(tzinfo=timezone.utc)), reverse=False)
+    return out
+
+def fetch_text(url):
+    r = SESSION.get(url, timeout=TIMEOUT, allow_redirects=True)
+    r.raise_for_status()
+    ct = r.headers.get("Content-Type","")
+    return (r.text if "html" in ct or ct == "" else r.content.decode("utf-8","ignore")), ct, r.url
+
+def looks_like_terms_page(html, url, ct):
+    if "pdf" in ct:
+        return True  # candidate; we’ll check text after extracting
+    if "html" in ct or ct == "":
+        title = re.search(r"<title[^>]*>(.*?)</title>", html, re.I|re.S)
+        h1 = re.search(r"<h1[^>]*>(.*?)</h1>", html, re.I|re.S)
+        hay = " ".join([
+            re.sub("<[^>]+>", " ", (title.group(1) if title else "")),
+            re.sub("<[^>]+>", " ", (h1.group(1) if h1 else "")),
+            html[:2000]  # cheap sniff
+        ])
+        return bool(TERMS_HINT_RE.search(hay) or TERMS_HINT_RE.search(url))
+    return False
+
+def extract_pdf_text(bytes_):
+    from pdfminer.high_level import extract_text
+    try:
+        with io.BytesIO(bytes_) as f:
+            return extract_text(f) or ""
+    except Exception:
+        return ""
+
+def crawl_domain_for_terms_and_basics(domain, max_pages=20, recent_days=None):
+    # 1) gather
+    urls = collect_domain_urls(domain, recent_days=recent_days)
+    # 2) filter
+    queue = filter_urls(urls, domain)[:max_pages]
+    results = {"domain": domain, "fetched": []}
+
+    for u, ts in queue:
+        try:
+            txt_or_bin, ct, final = fetch_text(u)
+            entry = {
+                "url": final, "content_type": ct, "lastmod": (ts.isoformat() if ts else None),
+                "retrieved_at": datetime.utcnow().isoformat() + "Z",
+                "is_terms_candidate": looks_like_terms_page(txt_or_bin, final, ct)
+            }
+            # Save term sheet if PDF
+            if "pdf" in ct:
+                pdf_bytes, _, _ = fetch_bytes(final)  # ensure bytes
+                pdf_text = extract_pdf_text(pdf_bytes)
+                entry["pdf_confirmed_terms"] = bool(TERMS_HINT_RE.search(pdf_text))
+                entry["pdf_char_count"] = len(pdf_text or "")
+            results["fetched"].append(entry)
+        except Exception as e:
+            results["fetched"].append({"url": u, "error": repr(e)})
+            continue
+    return results
+
+# Example:
+# r = crawl_domain_for_terms_and_basics("example.com", max_pages=30, recent_days=540)
+# print(json.dumps(r, indent=2))
+```
+
+---
+
+# How this answers your two bullets
+
+**1) “Site Map (domain/sitemap.xml — indexing, parsing) — create a filter, index, what has required criteria, home page”**
+
+* `collect_domain_urls()` discovers sitemaps (robots + guesses), recursively parses sitemap indexes, and returns `(url, lastmod)`.
+* `filter_urls()` keeps the **home page** and any URL matching your **required criteria** (regex), while excluding noise.
+* `recent_days` lets you constrain to “fresh” content via `<lastmod>`.
+
+**2) “Every company has term sheet”**
+
+* We interpret “term sheet” broadly (legal **Terms/ToS/MSA** and investment **Term Sheet**).
+* `TERMS_HINT_RE` looks for those signals in URLs, titles, H1s, and (for PDFs) inside extracted text.
+* PDF detection via `Content-Type` and confirmation with `pdfminer.six` text scan.
+* You’ll get a per-URL flag: `is_terms_candidate`, and for PDFs: `pdf_confirmed_terms`.
+
+---
+
+# Plugging in your business-field extractor
+
+After `crawl_domain_for_terms_and_basics`, take the **home page** and any **contact/about** page entries and pass their HTML through the extractor I provided earlier to populate:
+
+* name, address (+components), phone (+E.164), emails, description
+  Keep **provenance**: which URL gave which field, and confidence scores.
+
+---
+
+# Scaling notes (quick)
+
+* Respect robots.txt + ToS; throttle per domain.
+* Add retries with exponential backoff (429, 5xx).
+* Store raw HTML/PDF to S3/GCS with checksums.
+* Keep an **index table** keyed by domain with:
+
+  * discovered sitemaps, URL counts, last crawl, term-sheet hits, and hashes to detect changes.
+* Add Playwright for JS-only sites (Scrapy + `scrapy-playwright` is great).
+
+---
+
+If you share a sample domain list and your exact “required criteria” (regex or keywords), I can tailor the filters and hand you a ready-to-run script that outputs a clean CSV/JSON with the five fields plus term-sheet candidates.
+
+
